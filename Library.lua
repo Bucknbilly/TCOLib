@@ -12,7 +12,6 @@ local Mouse = LocalPlayer:GetMouse();
 local Toggled = false;
 local _lastTouchX, _lastTouchY = 0, 0;
 _lastTabHoverSoundTime = 0;
-Library._lastTabHoverSoundTime = 0;
 
 -- Track touch position globally so GetMousePosition always has a fresh value
 InputService.InputChanged:Connect(function(input)
@@ -45,6 +44,8 @@ local Library = {
 	RegistryMap = {};
 
 	HudRegistry = {};
+
+	_lastTabHoverSoundTime = 0,
 
 	FontColor = Color3.fromRGB(255, 255, 255);
 	MainColor = Color3.fromRGB(28, 28, 28);
