@@ -45,8 +45,6 @@ local Library = {
 
 	HudRegistry = {};
 
-	_lastTabHoverSoundTime = 0,
-
 	FontColor = Color3.fromRGB(255, 255, 255);
 	MainColor = Color3.fromRGB(28, 28, 28);
 	BackgroundColor = Color3.fromRGB(20, 20, 20);
@@ -319,10 +317,13 @@ function Library:OnHighlight(HighlightInstance, Instance, Properties, Properties
 end;
 
 function Library:GetMousePosition()
-	local mx, my = Mouse.X, Mouse.Y;
-	if type(mx) ~= 'number' then mx = 0 end;
-	if type(my) ~= 'number' then my = 0 end;
-	return mx, my;
+	local ok, lastType = pcall(function() return InputService:GetLastInputType() end);
+	if ok and lastType == Enum.UserInputType.Touch then
+		if _lastTouchX ~= 0 or _lastTouchY ~= 0 then
+			return _lastTouchX, _lastTouchY;
+		end;
+	end;
+	return Mouse.X, Mouse.Y;
 end;
 
 function Library:MouseIsOverOpenedFrame()
@@ -3816,24 +3817,15 @@ end;
 	end;
 
 	-- ── Popout toggle button (draggable, matches main toggle button style) ─
-	function Popout:CreateToggleButton(Text, Config)
-		if type(Text) == 'table' then Config = Text; Text = nil; end;
+	function Popout:CreateToggleButton(Text)
 		Text = Text or PTitle;
-		Config = Config or {};
-		local Icon = Config.Icon or '🌐';
-		local OnClick = Config.OnClick or Config.Callback or Config.Func;
-		local isImage = type(Icon) == 'string' and (
-			Icon:match('^rbxassetid://') or Icon:match('^https?://') or Icon:match('^rbxthumb://')
-			or Icon:lower():match('%.png$') or Icon:lower():match('%.jpg$')
-			or Icon:lower():match('%.jpeg$') or Icon:lower():match('%.gif$') or Icon:lower():match('%.webp$')
-		);
-		
+
 		local BtnOuter = Library:Create('Frame', {
 			Active           = true;
 			BackgroundColor3 = Library.OutlineColor;
 			BorderSizePixel  = 0;
 			Position         = UDim2.fromOffset(10, 50);
-			Size             = UDim2.fromOffset(120, 28);
+			Size             = UDim2.fromOffset(96, 28);
 			ZIndex           = 300;
 			Parent           = ScreenGui;
 		});
@@ -3872,34 +3864,18 @@ end;
 		Library:Create('UICorner', { CornerRadius = UDim.new(0, 3); Parent = _BtnAccent; });
 		Library:AddToRegistry(_BtnAccent, { BackgroundColor3 = 'AccentColor' });
 
-local BtnIcon
-if isImage then
-	BtnIcon = Library:Create('ImageLabel', {
-		BackgroundTransparency = 1;
-		Position  = UDim2.new(0, 6, 0, 4);
-		Size      = UDim2.new(0, 16, 1, -8);
-		Image     = Icon;
-		ImageColor3 = Library.AccentColor;
-		ImageTransparency = 0.2;
-		ScaleType = Enum.ScaleType.Fit;
-		ZIndex    = 303;
-		Parent    = BtnInner;
-	});
-	Library:AddToRegistry(BtnIcon, { ImageColor3 = 'AccentColor' });
-else
-	BtnIcon = Library:Create('TextLabel', {
-		BackgroundTransparency = 1;
-		Position  = UDim2.new(0, 6, 0, 0);
-		Size      = UDim2.new(0, 16, 1, 0);
-		Font      = Enum.Font.GothamBold;
-		Text      = Icon;
-		TextColor3 = Library.AccentColor;
-		TextSize  = 12;
-		ZIndex    = 303;
-		Parent    = BtnInner;
-	});
-	Library:AddToRegistry(BtnIcon, { TextColor3 = 'AccentColor' });
-end
+local BtnIcon = Library:Create('TextLabel', {
+    BackgroundTransparency = 1;
+    Position  = UDim2.new(0, 6, 0, 0);
+    Size      = UDim2.new(0, 16, 1, 0);
+    Font      = Enum.Font.GothamBold;
+    Text      = '🌐';
+    TextColor3 = Library.AccentColor;
+    TextSize  = 12;
+    ZIndex    = 303;
+    Parent    = BtnInner;
+});
+Library:AddToRegistry(BtnIcon, { TextColor3 = 'AccentColor' });
 
 local BtnDivider = Library:Create('Frame', {
     BackgroundColor3       = Library.OutlineColor;
@@ -3918,13 +3894,13 @@ local BtnLabel = Library:Create('TextLabel', {
     Size      = UDim2.new(1, -32, 1, 0);
     Text      = Text;
     TextColor3 = Library.FontColor;
-    TextSize  = 11;
+    TextSize  = 12;
+    TextScaled = true;
     Font      = Library.Font;
-    TextXAlignment = Enum.TextXAlignment.Left;
-    TextTruncate = Enum.TextTruncate.AtEnd;
     ZIndex    = 302;
     Parent    = BtnInner;
 });
+Library:Create('UITextSizeConstraint', { MinTextSize = 8; MaxTextSize = 12; Parent = BtnLabel; });
 Library:AddToRegistry(BtnLabel, { TextColor3 = 'FontColor' });
 
 		local BtnScale = Instance.new('UIScale');
@@ -3992,7 +3968,6 @@ Library:AddToRegistry(BtnLabel, { TextColor3 = 'FontColor' });
 				TweenService:Create(BtnInner, _ftw, { BackgroundColor3 = Library.MainColor }):Play();
 				if not _bDrag then
 					pcall(function() _BtnClickSfx:Play() end);
-					if OnClick then pcall(OnClick); end;
 					Popout:Toggle();
 				end;
 				_bDrag = false;
@@ -5312,18 +5287,6 @@ end;
 Groupbox:AddBlank(6);
 Groupbox:Resize();
 
-task.defer(function()
-    pcall(function()
-        local layout = Container:FindFirstChildWhichIsA('UIListLayout')
-        if layout then
-            layout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
-                pcall(function() Groupbox:Resize() end)
-            end)
-            Groupbox:Resize()
-        end
-    end)
-end);
-
 Tab.Groupboxes[Info.Name] = Groupbox;
 
 			return Groupbox;
@@ -5589,6 +5552,43 @@ function Library:Toggle()
 
 		if Toggled then
 			Outer.Visible = true;
+
+			task.spawn(function()
+				local State = InputService.MouseIconEnabled;
+
+				local Cursor = Drawing.new('Triangle');
+				Cursor.Thickness = 1;
+				Cursor.Filled = true;
+				Cursor.Visible = true;
+
+				local CursorOutline = Drawing.new('Triangle');
+				CursorOutline.Thickness = 1;
+				CursorOutline.Filled = false;
+				CursorOutline.Color = Color3.new(0, 0, 0);
+				CursorOutline.Visible = true;
+
+				while Toggled and ScreenGui.Parent do
+					InputService.MouseIconEnabled = false;
+
+					Cursor.Color = Library.AccentColor;
+
+					local mx, my = Library:GetMousePosition();
+					Cursor.PointA = Vector2.new(mx, my);
+					Cursor.PointB = Vector2.new(mx + 16, my + 6);
+					Cursor.PointC = Vector2.new(mx + 6, my + 16);
+
+					CursorOutline.PointA = Cursor.PointA;
+					CursorOutline.PointB = Cursor.PointB;
+					CursorOutline.PointC = Cursor.PointC;
+
+					RenderStepped:Wait();
+				end;
+
+				InputService.MouseIconEnabled = State;
+
+				Cursor:Remove();
+				CursorOutline:Remove();
+			end);
 		end;
 
 		for _, Desc in next, Outer:GetDescendants() do
