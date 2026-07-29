@@ -218,7 +218,7 @@ PlayerRight:AddDropdown('CameraMode', {
     Default = 1,
 })
 
-PlayerRight:AddKeyPicker('FreecamKey', {
+PlayerRight:AddLabel('Freecam hotkey'):AddKeyPicker('FreecamKey', {
     Text = 'Freecam Toggle',
     Default = 'F',
     Mode = 'Toggle',
