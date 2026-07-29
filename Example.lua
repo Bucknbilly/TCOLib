@@ -490,12 +490,12 @@ local Card4 = CardsRight:AddCard({
 Library:SetWatermarkVisibility(true)
 
 local Popout1 = Library:CreatePopout({ Title = 'Quick' })
-local p1Close   = Popout1:CreateToggleButton('Close UI',  { Icon = '✖'  })
-local p1Servers = Popout1:CreateToggleButton('Servers',   { Icon = '🌐' })
-local p1Builds  = Popout1:CreateToggleButton('Builds',    { Icon = '🏗' })
-local p1Light   = Popout1:CreateToggleButton('Enlighten', { Icon = '💡' })
-local p1Spec    = Popout1:CreateToggleButton('Special',   { Icon = '✨' })
-local p1Logo    = Popout1:CreateToggleButton('Logo',      { Icon = 'rbxassetid://8677660652' })
+local p1Close   = Popout1:CreateToggleButton('Close UI',  { Icon = '✖' })
+local p1Servers = Popout1:CreateToggleButton('Servers',   { Icon = '🌐', OnClick = function() Toggles.SpeedEnabled:SetValue(not Toggles.SpeedEnabled.Value) end })
+local p1Builds  = Popout1:CreateToggleButton('Builds',    { Icon = '🏗', OnClick = function() Toggles.JumpEnabled:SetValue(not Toggles.JumpEnabled.Value) end })
+local p1Light   = Popout1:CreateToggleButton('Enlighten', { Icon = '💡', OnClick = function() Toggles.Fullbright:SetValue(not Toggles.Fullbright.Value) end })
+local p1Spec    = Popout1:CreateToggleButton('Special',   { Icon = '✨', OnClick = function() Toggles.Noclip:SetValue(not Toggles.Noclip.Value) end })
+local p1Logo    = Popout1:CreateToggleButton('Logo',      { Icon = 'rbxassetid://8677660652', OnClick = function() Toggles.RemoveFog:SetValue(not Toggles.RemoveFog.Value) end })
 
 p1Close.Position   = UDim2.fromOffset(10, 50)
 p1Servers.Position = UDim2.fromOffset(10, 82)
@@ -503,36 +503,6 @@ p1Builds.Position  = UDim2.fromOffset(10, 114)
 p1Light.Position   = UDim2.fromOffset(10, 146)
 p1Spec.Position    = UDim2.fromOffset(10, 178)
 p1Logo.Position    = UDim2.fromOffset(10, 210)
-
-local function setBtnText(btn, text)
-    for _, child in next, btn:GetDescendants() do
-        if child:IsA('TextLabel') and child.Text ~= '🌐' and child.Text ~= '✖' and child.Text ~= '🏗' and child.Text ~= '💡' and child.Text ~= '✨' and not child.Text:match('^rbx') then
-            child.Text = text
-            return
-        end
-    end
-end
-
-p1Servers.MouseButton1Click:Connect(function()
-    Toggles.SpeedEnabled:SetValue(not Toggles.SpeedEnabled.Value)
-    setBtnText(p1Servers, Toggles.SpeedEnabled.Value and 'Servers: ON' or 'Servers')
-end)
-p1Builds.MouseButton1Click:Connect(function()
-    Toggles.JumpEnabled:SetValue(not Toggles.JumpEnabled.Value)
-    setBtnText(p1Builds, Toggles.JumpEnabled.Value and 'Builds: ON' or 'Builds')
-end)
-p1Light.MouseButton1Click:Connect(function()
-    Toggles.Fullbright:SetValue(not Toggles.Fullbright.Value)
-    setBtnText(p1Light, Toggles.Fullbright.Value and 'Enlighten: ON' or 'Enlighten')
-end)
-p1Spec.MouseButton1Click:Connect(function()
-    Toggles.Noclip:SetValue(not Toggles.Noclip.Value)
-    setBtnText(p1Spec, Toggles.Noclip.Value and 'Special: ON' or 'Special')
-end)
-p1Logo.MouseButton1Click:Connect(function()
-    Toggles.RemoveFog:SetValue(not Toggles.RemoveFog.Value)
-    setBtnText(p1Logo, Toggles.RemoveFog.Value and 'Logo: ON' or 'Logo')
-end)
 
 local FrameTimer = tick()
 local FrameCounter = 0
