@@ -5289,12 +5289,15 @@ Groupbox:AddBlank(6);
 Groupbox:Resize();
 
 task.defer(function()
-    local layout = Container:FindFirstChildWhichIsA('UIListLayout')
-    if layout then
-        layout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
-            pcall(function() Groupbox:Resize() end)
-        end)
-    end
+    pcall(function()
+        local layout = Container:FindFirstChildWhichIsA('UIListLayout')
+        if layout then
+            layout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+                pcall(function() Groupbox:Resize() end)
+            end)
+            Groupbox:Resize()
+        end
+    end)
 end);
 
 Tab.Groupboxes[Info.Name] = Groupbox;
@@ -5562,43 +5565,6 @@ function Library:Toggle()
 
 		if Toggled then
 			Outer.Visible = true;
-
-			task.spawn(function()
-				local State = InputService.MouseIconEnabled;
-
-				local Cursor = Drawing.new('Triangle');
-				Cursor.Thickness = 1;
-				Cursor.Filled = true;
-				Cursor.Visible = true;
-
-				local CursorOutline = Drawing.new('Triangle');
-				CursorOutline.Thickness = 1;
-				CursorOutline.Filled = false;
-				CursorOutline.Color = Color3.new(0, 0, 0);
-				CursorOutline.Visible = true;
-
-				while Toggled and ScreenGui.Parent do
-					InputService.MouseIconEnabled = false;
-
-					Cursor.Color = Library.AccentColor;
-
-					local mx, my = Library:GetMousePosition();
-					Cursor.PointA = Vector2.new(mx, my);
-					Cursor.PointB = Vector2.new(mx + 16, my + 6);
-					Cursor.PointC = Vector2.new(mx + 6, my + 16);
-
-					CursorOutline.PointA = Cursor.PointA;
-					CursorOutline.PointB = Cursor.PointB;
-					CursorOutline.PointC = Cursor.PointC;
-
-					RenderStepped:Wait();
-				end;
-
-				InputService.MouseIconEnabled = State;
-
-				Cursor:Remove();
-				CursorOutline:Remove();
-			end);
 		end;
 
 		for _, Desc in next, Outer:GetDescendants() do
