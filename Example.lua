@@ -490,12 +490,19 @@ local Card4 = CardsRight:AddCard({
 Library:SetWatermarkVisibility(true)
 
 local Popout1 = Library:CreatePopout({ Title = 'Quick' })
-Popout1:CreateToggleButton('Close UI', { Icon = '✖' })
-Popout1:CreateToggleButton('Servers', { Icon = '🌐' })
-Popout1:CreateToggleButton('Builds', { Icon = '🏗' })
-Popout1:CreateToggleButton('Enlighten', { Icon = '💡' })
-Popout1:CreateToggleButton('Special', { Icon = '✨' })
-Popout1:CreateToggleButton('Logo', { Icon = 'rbxassetid://8677660652' })
+local p1Close   = Popout1:CreateToggleButton('Close UI',  { Icon = '✖'  })
+local p1Servers = Popout1:CreateToggleButton('Servers',   { Icon = '🌐' })
+local p1Builds  = Popout1:CreateToggleButton('Builds',    { Icon = '🏗' })
+local p1Light   = Popout1:CreateToggleButton('Enlighten', { Icon = '💡' })
+local p1Spec    = Popout1:CreateToggleButton('Special',   { Icon = '✨' })
+local p1Logo    = Popout1:CreateToggleButton('Logo',      { Icon = 'rbxassetid://8677660652' })
+
+p1Close.Position   = UDim2.fromOffset(10, 50)
+p1Servers.Position = UDim2.fromOffset(10, 82)
+p1Builds.Position  = UDim2.fromOffset(10, 114)
+p1Light.Position   = UDim2.fromOffset(10, 146)
+p1Spec.Position    = UDim2.fromOffset(10, 178)
+p1Logo.Position    = UDim2.fromOffset(10, 210)
 
 local FrameTimer = tick()
 local FrameCounter = 0
