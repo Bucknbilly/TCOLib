@@ -12,208 +12,416 @@ local Window = Library:CreateWindow({
     MenuFadeTime = 0.2,
 })
 
+local Players = game:GetService('Players')
+local RunService = game:GetService('RunService')
+local UserInputService = game:GetService('UserInputService')
+local LocalPlayer = Players.LocalPlayer
+
 local Tabs = {
-    Main    = Window:AddTab('Main'),
-    Build   = Window:AddTab('Build'),
-    Visuals = Window:AddTab('Visuals'),
-    Cards   = Window:AddTab('Cards'),
+    Player    = Window:AddTab('Player'),
+    Teleport  = Window:AddTab('Teleport'),
+    World     = Window:AddTab('World'),
+    Settings  = Window:AddTab('Settings'),
+    Cards     = Window:AddTab('Cards'),
     ['UI Settings'] = Window:AddTab('UI Settings'),
 }
 
-local LeftGroupBox  = Tabs.Main:AddLeftGroupbox('Toggles')
-local RightGroupBox = Tabs.Main:AddRightGroupbox('Information')
+local PlayerLeft = Tabs.Player:AddLeftGroupbox('Movement')
+local PlayerRight = Tabs.Player:AddRightGroupbox('Look & Combat')
 
-LeftGroupBox:AddToggle('MyToggle', {
-    Text = 'This is a toggle',
-    Default = true,
-    Tooltip = 'Tooltip text on hover.',
-    Callback = function(Value) print('[cb] MyToggle:', Value) end,
-})
-Toggles.MyToggle:OnChanged(function()
-    print('MyToggle ->', Toggles.MyToggle.Value)
-end)
+local defaultWalk = 16
+local defaultJump = 50
 
-LeftGroupBox:AddButton({
-    Text = 'Main button',
-    Func = function() print('Clicked main!') end,
-    DoubleClick = false,
-    Tooltip = 'Single-click trigger.',
-})
-LeftGroupBox:AddButton({
-    Text = 'Double-click button',
-    Func = function() print('Clicked double!') end,
-    DoubleClick = true,
-    Tooltip = 'Requires two clicks to trigger.',
-})
-
-LeftGroupBox:AddLabel('This is a label')
-LeftGroupBox:AddLabel('Multi-line label\ndemonstrates text wrapping!', true)
-LeftGroupBox:AddDivider()
-
-LeftGroupBox:AddSlider('MySlider', {
-    Text = 'Slider with suffix',
-    Default = 16,
-    Min = 4, Max = 128,
-    Rounding = 0,
-    Suffix = ' studs',
-    Callback = function(Value) print('[cb] MySlider:', Value) end,
-})
-
-LeftGroupBox:AddInput('MyInput', {
-    Text = 'Text input',
-    Default = '',
-    Placeholder = 'Type here...',
-    Finished = false,
-    Callback = function(Value) print('[cb] MyInput:', Value) end,
-})
-
-LeftGroupBox:AddDropdown('MyDropdown', {
-    Text = 'Single dropdown',
-    Values = { 'Plastic', 'Neon', 'Metal', 'Glass', 'Wood' },
-    Default = 1,
-    Multi = false,
-    Callback = function(Value) print('[cb] MyDropdown:', Value) end,
-})
-
-LeftGroupBox:AddDropdown('MyMultiDropdown', {
-    Text = 'Multi dropdown',
-    Values = { 'Red', 'Green', 'Blue', 'Yellow' },
-    Default = 'Yellow',
-    Multi = true,
-    Callback = function(Value) print('[cb] MyMultiDropdown changed') end,
-})
-
-LeftGroupBox:AddDropdown('MyPlayerDropdown', {
-    SpecialType = 'Player',
-    Text = 'Player dropdown',
-    Tooltip = 'Populates with players in the server.',
-    Callback = function(Value) print('[cb] PlayerDropdown:', Value) end,
-})
-
-RightGroupBox:AddLabel('Color'):AddColorPicker('ColorPicker', {
-    Default = Color3.fromRGB(255, 204, 0),
-    Title = 'Pick a color',
-    Transparency = 0,
-    Callback = function(Value) print('[cb] ColorPicker:', Value) end,
-})
-
-RightGroupBox:AddLabel('Keybind'):AddKeyPicker('KeyPicker', {
-    Default = 'MB2',
-    Mode = 'Toggle',
-    Text = 'Auto lockpick',
-    Callback = function(Value) print('[cb] KeyPicker:', Value) end,
-    ChangedCallback = function(New) print('[cb] KeyPicker changed:', New) end,
-})
-
-Options.KeyPicker:OnClick(function()
-    print('KeyPicker clicked!', Options.KeyPicker:GetState())
-end)
-
-task.spawn(function()
-    while true do
-        wait(1)
-        if Options.KeyPicker:GetState() then
-            print('KeyPicker is being held down')
+PlayerLeft:AddToggle('SpeedEnabled', {
+    Text = 'Enable Speed',
+    Default = false,
+    Tooltip = 'Multiplies WalkSpeed by the slider value.',
+    Callback = function(v)
+        if v then
+            RunService.Heartbeat:Connect(function()
+                if Toggles.SpeedEnabled.Value and LocalPlayer.Character then
+                    local hum = LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
+                    if hum then hum.WalkSpeed = defaultWalk * Options.SpeedMultiplier.Value end
+                end
+            end)
         end
-        if Library.Unloaded then break end
+    end,
+})
+PlayerLeft:AddSlider('SpeedMultiplier', {
+    Text = 'Speed Multiplier',
+    Default = 2,
+    Min = 1,
+    Max = 10,
+    Rounding = 1,
+    Suffix = 'x',
+})
+
+PlayerLeft:AddToggle('JumpEnabled', {
+    Text = 'Enable Jump Power',
+    Default = false,
+    Tooltip = 'Sets JumpPower to the slider value each frame.',
+    Callback = function(v)
+        if v then
+            RunService.Heartbeat:Connect(function()
+                if Toggles.JumpEnabled.Value and LocalPlayer.Character then
+                    local hum = LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
+                    if hum then hum.JumpPower = defaultJump * Options.JumpMultiplier.Value end
+                end
+            end)
+        end
+    end,
+})
+PlayerLeft:AddSlider('JumpMultiplier', {
+    Text = 'Jump Multiplier',
+    Default = 1,
+    Min = 1,
+    Max = 5,
+    Rounding = 1,
+    Suffix = 'x',
+})
+
+PlayerLeft:AddSlider('HipHeight', {
+    Text = 'HipHeight',
+    Default = 0,
+    Min = 0,
+    Max = 20,
+    Rounding = 1,
+    Suffix = ' studs',
+    Compact = false,
+})
+Toggles.SpeedEnabled:OnChanged(function()
+    if not Toggles.SpeedEnabled.Value then
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
+        if hum then hum.WalkSpeed = defaultWalk end
+    end
+end)
+Toggles.JumpEnabled:OnChanged(function()
+    if not Toggles.JumpEnabled.Value then
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
+        if hum then hum.JumpPower = defaultJump end
     end
 end)
 
-local RightGroupbox2 = Tabs.Main:AddRightGroupbox('Dependency Boxes')
-RightGroupbox2:AddToggle('ControlToggle', { Text = 'Dependency box toggle' })
-
-local Depbox = RightGroupbox2:AddDependencyBox()
-Depbox:AddToggle('DepboxToggle', { Text = 'Sub-dependency box toggle' })
-
-local SubDepbox = Depbox:AddDependencyBox()
-SubDepbox:AddSlider('DepboxSlider', { Text = 'Slider', Default = 50, Min = 0, Max = 100, Rounding = 0 })
-SubDepbox:AddDropdown('DepboxDropdown', { Text = 'Dropdown', Default = 1, Values = { 'a', 'b', 'c' } })
-
-Depbox:SetupDependencies({ { Toggles.ControlToggle, true } })
-SubDepbox:SetupDependencies({ { Toggles.DepboxToggle, true } })
-
-local TabBox = Tabs.Main:AddRightTabbox()
-local Tab1 = TabBox:AddTab('Tab 1')
-Tab1:AddToggle('Tab1Toggle', { Text = 'Tab1 Toggle' })
-local Tab2 = TabBox:AddTab('Tab 2')
-Tab2:AddToggle('Tab2Toggle', { Text = 'Tab2 Toggle' })
-
-local BuildLeftBox = Tabs.Build:AddLeftGroupbox('Build Settings')
-BuildLeftBox:AddToggle('AutoBuild', { Text = 'Auto-Build', Default = false })
-BuildLeftBox:AddSlider('BuildSpeed', {
-    Text = 'Place delay (s)',
-    Default = 0.05, Min = 0, Max = 1, Rounding = 3,
-    Suffix = 's',
+PlayerLeft:AddDivider()
+PlayerLeft:AddDropdown('Gravity', {
+    Text = 'Gravity Mode',
+    Values = { 'Normal', 'Low', 'Moon', 'Zero' },
+    Default = 1,
+    Callback = function(value)
+        if value == 'Normal' then workspace.Gravity = 196.2
+        elseif value == 'Low' then workspace.Gravity = 100
+        elseif value == 'Moon' then workspace.Gravity = 30
+        elseif value == 'Zero' then workspace.Gravity = 0 end
+    end,
 })
-BuildLeftBox:AddDropdown('BuildMode', {
-    Text = 'Build mode',
-    Values = { 'Adhere', 'Free', 'Symmetric', 'Mirror' },
+
+PlayerLeft:AddInput('ChatMessage', {
+    Text = 'Quick Chat',
+    Default = '',
+    Placeholder = 'Type a message...',
+    Finished = true,
+    MaxLength = 200,
+    Callback = function(text)
+        if text and text ~= '' then
+            game:GetService('TextChatService'):FindFirstChild('TextChannels')
+                and game:GetService('TextChatService').TextChannels.RBXGeneral:SendAsync(text)
+        end
+    end,
+})
+
+PlayerRight:AddToggle('Noclip', {
+    Text = 'Noclip',
+    Default = false,
+    Tooltip = 'Walk through solid parts.',
+    Callback = function(v)
+        if v then
+            RunService.Stepped:Connect(function()
+                if Toggles.Noclip.Value and LocalPlayer.Character then
+                    for _, p in next, LocalPlayer.Character:GetDescendants() do
+                        if p:IsA('BasePart') then p.CanCollide = false end
+                    end
+                end
+            end)
+        end
+    end,
+})
+
+PlayerRight:AddToggle('InfiniteJump', {
+    Text = 'Infinite Jump',
+    Default = false,
+    Tooltip = 'Lets you jump in mid-air.',
+    Callback = function(v)
+        if v then
+            UserInputService.JumpRequest:Connect(function()
+                if Toggles.InfiniteJump.Value and LocalPlayer.Character then
+                    local hum = LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
+                    if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+                end
+            end)
+        end
+    end,
+})
+
+PlayerRight:AddSlider('FOV', {
+    Text = 'Camera FOV',
+    Default = 70,
+    Min = 30,
+    Max = 120,
+    Rounding = 0,
+})
+
+PlayerRight:AddDropdown('CameraMode', {
+    Text = 'Camera Mode',
+    Values = { 'Default', 'First Person', 'Follow', 'Free' },
     Default = 1,
 })
 
-local BuildRightBox = Tabs.Build:AddRightGroupbox('Transform')
-BuildRightBox:AddToggle('TransformEnabled', { Text = 'Enable Transform handles', Default = false })
-BuildRightBox:AddSlider('TransformSnap', {
-    Text = 'Snap step',
-    Default = 4, Min = 1, Max = 32, Rounding = 0,
-    Suffix = ' studs',
-})
-BuildRightBox:AddDropdown('RotationAxis', {
-    Text = 'Rotation axis',
-    Values = { 'X', 'Y', 'Z', 'Multi' },
-    Default = 2,
+PlayerRight:AddKeyPicker('FreecamKey', {
+    Text = 'Freecam Toggle',
+    Default = 'F',
+    Mode = 'Toggle',
 })
 
-local VisualsLeftBox = Tabs.Visuals:AddLeftGroupbox('Preview')
-VisualsLeftBox:AddToggle('PreviewEnabled', { Text = '3D Preview overlay', Default = true })
-VisualsLeftBox:AddSlider('PreviewAlpha', {
-    Text = 'Preview alpha',
-    Default = 0.4, Min = 0, Max = 1, Rounding = 2,
+local TPLeft = Tabs.Teleport:AddLeftGroupbox('Waypoints')
+TPLeft:AddInput('WaypointName', {
+    Text = 'New waypoint name',
+    Default = '',
+    Placeholder = 'e.g. spawn',
+})
+TPLeft:AddDropdown('WaypointList', {
+    Text = 'Saved waypoints',
+    Values = {},
+    AllowNull = true,
+    SpecialType = 'Player',
 })
 
-local CardsLeftBox = Tabs.Cards:AddLeftGroupbox('Info Cards')
+local waypoints = {}
+local function addWaypoint(name, pos)
+    table.insert(waypoints, { name = name, pos = pos })
+    local names = {}
+    for _, w in next, waypoints do table.insert(names, w.name) end
+    Options.WaypointList:SetValues(names)
+end
+TPLeft:AddButton({ Text = 'Save current position', Func = function()
+    local name = Options.WaypointName.Value
+    if name == '' then return Library:Notify('Name required', 3) end
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild('HumanoidRootPart') then
+        addWaypoint(name, LocalPlayer.Character.HumanoidRootPart.Position)
+        Library:Notify('Saved ' .. name, 3)
+    end
+end })
+TPLeft:AddButton({ Text = 'Teleport to waypoint', Func = function()
+    local sel = Options.WaypointList.Value
+    for _, w in next, waypoints do
+        if w.name == sel and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild('HumanoidRootPart') then
+            LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(w.pos)
+            Library:Notify('Teleported to ' .. sel, 3)
+            return
+        end
+    end
+    Library:Notify('Pick a waypoint first', 3)
+end, DoubleClick = true })
 
-local Card1 = CardsLeftBox:AddCard({
-    Title = 'Build Slot #1',
-    Subtitle = 'Last edited 2 minutes ago',
-    Badge = 'Active',
-    BadgeColor = Library.AccentColor,
-    Thumbnail = 'https://i.imgur.com/qs0Hqc6.png',
-    ButtonText = 'Load',
-    ButtonFunc = function() print('Card1 load pressed') end,
+TPLeft:AddDivider()
+
+local TPRight = Tabs.Teleport:AddRightGroupbox('Player Teleport')
+TPRight:AddButton({ Text = 'Teleport to Player', Func = function()
+    local name = Options.WaypointList.Value
+    if not name then return Library:Notify('Pick a player', 3) end
+    local target = Players:FindFirstChild(name)
+    if not target or not target.Character then return Library:Notify('Not in game', 3) end
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild('HumanoidRootPart') then
+        LocalPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+    end
+end, DoubleClick = true })
+
+TPRight:AddButton({ Text = 'Spectate Player', Func = function()
+    local name = Options.WaypointList.Value
+    if not name then return Library:Notify('Pick a player', 3) end
+    local target = Players:FindFirstChild(name)
+    if target and target.Character and workspace.CurrentCamera then
+        workspace.CurrentCamera.CameraSubject = target.Character:FindFirstChildOfClass('Humanoid')
+    end
+end })
+
+local WorldLeft = Tabs.World:AddLeftGroupbox('Lighting')
+WorldLeft:AddSlider('Brightness', {
+    Text = 'Brightness',
+    Default = 2, Min = 0, Max = 10, Rounding = 1,
+    Compact = true,
+})
+WorldLeft:AddToggle('Fullbright', {
+    Text = 'Fullbright',
+    Default = false,
+    Callback = function(v)
+        local lighting = game:GetService('Lighting')
+        if v then
+            lighting.Brightness = Options.Brightness.Value
+            lighting.GlobalShadows = false
+            lighting.FogEnd = 1e9
+        else
+            lighting.Brightness = 1
+            lighting.GlobalShadows = true
+            lighting.FogEnd = 100000
+        end
+    end,
 })
 
-local Card2 = CardsLeftBox:AddCard({
-    Title = 'Build Slot #2',
-    Subtitle = 'Empty',
-    Badge = 'Empty',
-    BadgeColor = Color3.fromRGB(120, 120, 120),
-    ButtonText = 'Create',
-    ButtonFunc = function() print('Card2 create pressed') end,
+WorldLeft:AddLabel('Ambient color'):AddColorPicker('AmbientColor', {
+    Default = Color3.fromRGB(127, 127, 127),
+    Title = 'Ambient',
+    Transparency = 0,
 })
 
-Card1:SetBadge('Verified')
-Card1:SetSubtitle('Just updated')
+WorldLeft:AddDropdown('TimeOfDay', {
+    Text = 'Time of Day',
+    Values = { 'Day', 'Night', 'Dusk', 'Dawn' },
+    Default = 1,
+    Callback = function(value)
+        local lighting = game:GetService('Lighting')
+        if value == 'Day' then lighting.ClockTime = 14
+        elseif value == 'Night' then lighting.ClockTime = 0
+        elseif value == 'Dusk' then lighting.ClockTime = 19
+        elseif value == 'Dawn' then lighting.ClockTime = 6 end
+    end,
+})
 
-local CardsRightBox = Tabs.Cards:AddRightGroupbox('Rows')
+local WorldRight = Tabs.World:AddRightGroupbox('Fog & Atmosphere')
+WorldRight:AddToggle('RemoveFog', {
+    Text = 'Remove Fog',
+    Default = false,
+    Callback = function(v)
+        if v then
+            game:GetService('Lighting').FogEnd = 1e9
+            game:GetService('Lighting').FogStart = 0
+        else
+            game:GetService('Lighting').FogEnd = 100000
+        end
+    end,
+})
+WorldRight:AddSlider('FogStart', {
+    Text = 'Fog Start',
+    Default = 0, Min = 0, Max = 1000, Rounding = 0,
+})
+WorldRight:AddSlider('FogEnd', {
+    Text = 'Fog End',
+    Default = 100000, Min = 1000, Max = 1000000, Rounding = 0,
+})
+WorldRight:AddBlank(8)
+WorldRight:AddDivider()
+WorldRight:AddLabel('Choose a background color')
+WorldRight:AddLabel('Sky tint'):AddColorPicker('SkyTint', {
+    Default = Color3.fromRGB(255, 204, 0),
+})
 
-local Row1 = CardsRightBox:AddRow({
-    Text = 'Status',
-    Value = 'Idle',
+local SettingsLeft = Tabs.Settings:AddLeftGroupbox('Hotkeys')
+SettingsLeft:AddLabel('Speed hotkey'):AddKeyPicker('SpeedHotkey', {
+    Default = 'X',
+    Mode = 'Toggle',
+    Text = 'Toggle Speed',
+    NoUI = false,
+    SyncToggleState = true,
+})
+SettingsLeft:AddLabel('Jump hotkey'):AddKeyPicker('JumpHotkey', {
+    Default = 'C',
+    Mode = 'Toggle',
+    Text = 'Toggle Jump Power',
+})
+SettingsLeft:AddLabel('Noclip hotkey'):AddKeyPicker('NoclipHotkey', {
+    Default = 'V',
+    Mode = 'Hold',
+    Text = 'Hold Noclip',
+})
+SettingsLeft:AddDivider()
+SettingsLeft:AddToggle('AntiAFK', { Text = 'Anti-AFK', Default = false })
+
+local SettingsRight = Tabs.Settings:AddRightGroupbox('Misc')
+SettingsRight:AddButton({ Text = 'Respawn', Func = function()
+    if LocalPlayer.Character then LocalPlayer.Character:BreakJoints() end
+end, DoubleClick = true })
+SettingsRight:AddButton({ Text = 'Rejoin Server', Func = function
+    game:GetService('TeleportService'):TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+end, DoubleClick = true })
+SettingsRight:AddButton({ Text = 'Copy Place ID', Func = function()
+    pcall(function()
+        if setclipboard then setclipboard(tostring(game.PlaceId)) end
+    end)
+end })
+SettingsRight:AddButton({ Text = 'Copy Job ID', Func = function()
+    pcall(function()
+        if setclipboard then setclipboard(game.JobId) end
+    end)
+end })
+
+SettingsRight:AddDivider()
+local Row1 = SettingsRight:AddRow({
+    Text = 'Server status',
+    Value = 'online',
     ButtonText = 'Refresh',
-    ButtonCallback = function() print('Refresh pressed') end,
+    ButtonCallback = function() Row1:SetText('Server status: ' .. tostring(#Players:GetPlayers()) .. ' players') end,
 })
-Row1:SetText('Status: Ready')
-
-local Row2 = CardsRightBox:AddRow({
-    Text = 'Build count',
-    Value = '0',
+local Row2 = SettingsRight:AddRow({
+    Text = 'Place ID',
+    Value = tostring(game.PlaceId),
 })
-Row2:SetText('Build count: 42')
+local Row3 = SettingsRight:AddRow({
+    Text = 'Job ID',
+    Value = game.JobId,
+})
+Row1:SetText('Server status: ' .. #Players:GetPlayers() .. ' players')
+Row2:SetText('Place ID: ' .. tostring(game.PlaceId))
 
-CardsRightBox:AddBlank(8)
-CardsRightBox:AddDivider()
-CardsRightBox:AddBlank(8)
+local CardsLeft = Tabs.Cards:AddLeftGroupbox('Server Info Cards')
+
+local Card1 = CardsLeft:AddCard({
+    Title = 'Current Server',
+    Subtitle = #Players:GetPlayers() .. ' players online',
+    Badge = 'Live',
+    BadgeColor = Library.AccentColor,
+    ButtonText = 'Copy ID',
+    ButtonFunc = function()
+        if setclipboard then setclipboard(game.JobId) end
+    end,
+})
+
+CardsLeft:AddBlank(8)
+
+local Card2 = CardsLeft:AddCard({
+    Title = 'Roblox Profile',
+    Subtitle = '@' .. (LocalPlayer.Name or 'guest'),
+    Badge = 'You',
+    BadgeColor = Color3.fromRGB(120, 120, 120),
+    ButtonText = 'Open Profile',
+    ButtonFunc = function()
+        pcall(function()
+            game:GetService('GuiService'):OpenBrowserWindow('https://www.roblox.com/users/' .. LocalPlayer.UserId .. '/profile')
+        end)
+    end,
+})
+
+Card1:SetBadge('Online')
+Card1:SetSubtitle(#Players:GetPlayers() .. ' in server')
+
+local CardsRight = Tabs.Cards:AddRightGroupbox('Quick Links')
+local Card3 = CardsRight:AddCard({
+    Title = 'Roblox Home',
+    Subtitle = 'Open roblox.com',
+    ButtonText = 'Visit',
+    ButtonFunc = function()
+        pcall(function() game:GetService('GuiService'):OpenBrowserWindow('https://www.roblox.com') end)
+    end,
+})
+CardsRight:AddBlank(6)
+local Card4 = CardsRight:AddCard({
+    Title = 'Game Page',
+    Subtitle = 'View place info',
+    ButtonText = 'Visit',
+    ButtonFunc = function()
+        pcall(function()
+            game:GetService('GuiService'):OpenBrowserWindow('https://www.roblox.com/games/' .. game.PlaceId)
+        end)
+    end,
+})
 
 Library:SetWatermarkVisibility(true)
 
@@ -221,7 +429,7 @@ local FrameTimer = tick()
 local FrameCounter = 0
 local FPS = 60
 
-local WatermarkConnection = game:GetService('RunService').RenderStepped:Connect(function()
+local WatermarkConnection = RunService.RenderStepped:Connect(function()
     FrameCounter += 1
     if (tick() - FrameTimer) >= 1 then
         FPS = FrameCounter
