@@ -4,6 +4,12 @@ local Library      = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
 local SaveManager  = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
 
+local Players = game:GetService('Players')
+local RunService = game:GetService('RunService')
+local UserInputService = game:GetService('UserInputService')
+local Stats = game:GetService('Stats')
+local LocalPlayer = Players.LocalPlayer
+
 local Window = Library:CreateWindow({
     Title = 'TCOLib Example',
     Center = true,
@@ -44,11 +50,6 @@ end })
 HomeBtns:AddButton({ Text = 'Copy Job ID', Func = function()
     if setclipboard then setclipboard(game.JobId) end
 end })
-
-local Players = game:GetService('Players')
-local RunService = game:GetService('RunService')
-local UserInputService = game:GetService('UserInputService')
-local LocalPlayer = Players.LocalPlayer
 
 local Tabs = {
     Player    = Window:AddTab('Player'),
