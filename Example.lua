@@ -123,8 +123,16 @@ PlayerLeft:AddInput('ChatMessage', {
     MaxLength = 200,
     Callback = function(text)
         if text and text ~= '' then
-            game:GetService('TextChatService'):FindFirstChild('TextChannels')
-                and game:GetService('TextChatService').TextChannels.RBXGeneral:SendAsync(text)
+            pcall(function()
+                local chat = game:GetService('TextChatService')
+                local channel = chat:FindFirstChild('TextChannels')
+                    and chat.TextChannels:FindFirstChild('RBXGeneral')
+                if channel and channel.SendAsync then
+                    channel:SendAsync(text)
+                elseif LocalPlayer.Character then
+                    game:GetService('ReplicatedStorage').DefaultChatSystemChatEvents.SayMessageRequest:FireServer(text, 'All')
+                end
+            end)
         end
     end,
 })
