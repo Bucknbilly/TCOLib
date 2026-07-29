@@ -347,7 +347,7 @@ local SettingsRight = Tabs.Settings:AddRightGroupbox('Misc')
 SettingsRight:AddButton({ Text = 'Respawn', Func = function()
     if LocalPlayer.Character then LocalPlayer.Character:BreakJoints() end
 end, DoubleClick = true })
-SettingsRight:AddButton({ Text = 'Rejoin Server', Func = function
+SettingsRight:AddButton({ Text = 'Rejoin Server', Func = function()
     game:GetService('TeleportService'):TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
 end, DoubleClick = true })
 SettingsRight:AddButton({ Text = 'Copy Place ID', Func = function()
@@ -438,7 +438,7 @@ local FrameCounter = 0
 local FPS = 60
 
 local WatermarkConnection = RunService.RenderStepped:Connect(function()
-    FrameCounter += 1
+    FrameCounter = FrameCounter + 1
     if (tick() - FrameTimer) >= 1 then
         FPS = FrameCounter
         FrameTimer = tick()
