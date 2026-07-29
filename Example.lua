@@ -420,10 +420,10 @@ local Card1 = CardsLeft:AddCard({
     Subtitle = #Players:GetPlayers() .. ' players online',
     Badge = 'Live',
     BadgeColor = Library.AccentColor,
-    ButtonText = 'Copy ID',
-    ButtonFunc = function()
-        if setclipboard then setclipboard(game.JobId) end
-    end,
+    Button = {
+        Text = 'Copy ID',
+        Func = function() if setclipboard then setclipboard(game.JobId) end end,
+    },
 })
 
 CardsLeft:AddBlank(8)
@@ -433,12 +433,14 @@ local Card2 = CardsLeft:AddCard({
     Subtitle = '@' .. (LocalPlayer.Name or 'guest'),
     Badge = 'You',
     BadgeColor = Color3.fromRGB(120, 120, 120),
-    ButtonText = 'Open Profile',
-    ButtonFunc = function()
-        pcall(function()
-            game:GetService('GuiService'):OpenBrowserWindow('https://www.roblox.com/users/' .. LocalPlayer.UserId .. '/profile')
-        end)
-    end,
+    Button = {
+        Text = 'Open Profile',
+        Func = function()
+            pcall(function()
+                game:GetService('GuiService'):OpenBrowserWindow('https://www.roblox.com/users/' .. LocalPlayer.UserId .. '/profile')
+            end)
+        end,
+    },
 })
 
 Card1:SetBadge('Online')
@@ -448,24 +450,36 @@ local CardsRight = Tabs.Cards:AddRightGroupbox('Quick Links')
 local Card3 = CardsRight:AddCard({
     Title = 'Roblox Home',
     Subtitle = 'Open roblox.com',
-    ButtonText = 'Visit',
-    ButtonFunc = function()
-        pcall(function() game:GetService('GuiService'):OpenBrowserWindow('https://www.roblox.com') end)
-    end,
+    Button = {
+        Text = 'Visit',
+        Func = function()
+            pcall(function() game:GetService('GuiService'):OpenBrowserWindow('https://www.roblox.com') end)
+        end,
+    },
 })
 CardsRight:AddBlank(6)
 local Card4 = CardsRight:AddCard({
     Title = 'Game Page',
     Subtitle = 'View place info',
-    ButtonText = 'Visit',
-    ButtonFunc = function()
-        pcall(function()
-            game:GetService('GuiService'):OpenBrowserWindow('https://www.roblox.com/games/' .. game.PlaceId)
-        end)
-    end,
+    Button = {
+        Text = 'Visit',
+        Func = function()
+            pcall(function()
+                game:GetService('GuiService'):OpenBrowserWindow('https://www.roblox.com/games/' .. game.PlaceId)
+            end)
+        end,
+    },
 })
 
 Library:SetWatermarkVisibility(true)
+
+local Popout1 = Library:CreatePopout({ Title = 'Quick' })
+Popout1:CreateToggleButton('Close UI', { Icon = '✖' })
+Popout1:CreateToggleButton('Servers', { Icon = '🌐' })
+Popout1:CreateToggleButton('Builds', { Icon = '🏗' })
+Popout1:CreateToggleButton('Enlighten', { Icon = '💡' })
+Popout1:CreateToggleButton('Special', { Icon = '✨' })
+Popout1:CreateToggleButton('Logo', { Icon = 'rbxassetid://8677660652' })
 
 local FrameTimer = tick()
 local FrameCounter = 0

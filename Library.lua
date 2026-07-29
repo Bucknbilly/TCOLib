@@ -3818,8 +3818,22 @@ end;
 	end;
 
 	-- ── Popout toggle button (draggable, matches main toggle button style) ─
-	function Popout:CreateToggleButton(Text)
+	function Popout:CreateToggleButton(Text, Config)
+		if type(Text) == 'table' then Config = Text; Text = nil; end;
 		Text = Text or PTitle;
+		Config = Config or {};
+		local Icon = Config.Icon or '🌐';
+		local OnClick = Config.OnClick or Config.Callback or Config.Func;
+		local isImage = type(Icon) == 'string' and (
+			Icon:match('^rbxassetid://')
+			or Icon:match('^https?://')
+			or Icon:match('^rbxthumb://')
+			or Icon:lower():match('%.png$')
+			or Icon:lower():match('%.jpg$')
+			or Icon:lower():match('%.jpeg$')
+			or Icon:lower():match('%.gif$')
+			or Icon:lower():match('%.webp$')
+		);
 
 		local BtnOuter = Library:Create('Frame', {
 			Active           = true;
@@ -3865,18 +3879,34 @@ end;
 		Library:Create('UICorner', { CornerRadius = UDim.new(0, 3); Parent = _BtnAccent; });
 		Library:AddToRegistry(_BtnAccent, { BackgroundColor3 = 'AccentColor' });
 
-local BtnIcon = Library:Create('TextLabel', {
-    BackgroundTransparency = 1;
-    Position  = UDim2.new(0, 6, 0, 0);
-    Size      = UDim2.new(0, 16, 1, 0);
-    Font      = Enum.Font.GothamBold;
-    Text      = '🌐';
-    TextColor3 = Library.AccentColor;
-    TextSize  = 12;
-    ZIndex    = 303;
-    Parent    = BtnInner;
-});
-Library:AddToRegistry(BtnIcon, { TextColor3 = 'AccentColor' });
+local BtnIcon
+if isImage then
+	BtnIcon = Library:Create('ImageLabel', {
+		BackgroundTransparency = 1;
+		Position  = UDim2.new(0, 6, 0, 4);
+		Size      = UDim2.new(0, 16, 1, -8);
+		Image     = Icon;
+		ImageColor3 = Library.AccentColor;
+		ImageTransparency = 0.2;
+		ScaleType = Enum.ScaleType.Fit;
+		ZIndex    = 303;
+		Parent    = BtnInner;
+	});
+	Library:AddToRegistry(BtnIcon, { ImageColor3 = 'AccentColor' });
+else
+	BtnIcon = Library:Create('TextLabel', {
+		BackgroundTransparency = 1;
+		Position  = UDim2.new(0, 6, 0, 0);
+		Size      = UDim2.new(0, 16, 1, 0);
+		Font      = Enum.Font.GothamBold;
+		Text      = Icon;
+		TextColor3 = Library.AccentColor;
+		TextSize  = 12;
+		ZIndex    = 303;
+		Parent    = BtnInner;
+	});
+	Library:AddToRegistry(BtnIcon, { TextColor3 = 'AccentColor' });
+end
 
 local BtnDivider = Library:Create('Frame', {
     BackgroundColor3       = Library.OutlineColor;
@@ -3969,7 +3999,11 @@ Library:AddToRegistry(BtnLabel, { TextColor3 = 'FontColor' });
 				TweenService:Create(BtnInner, _ftw, { BackgroundColor3 = Library.MainColor }):Play();
 				if not _bDrag then
 					pcall(function() _BtnClickSfx:Play() end);
-					Popout:Toggle();
+					if OnClick then
+						pcall(OnClick);
+					else
+						Popout:Toggle();
+					end;
 				end;
 				_bDrag = false;
 			end);
@@ -3981,8 +4015,21 @@ Library:AddToRegistry(BtnLabel, { TextColor3 = 'FontColor' });
 	return Popout;
 end;
 
-function Library:CreateToggleButton(Text)
+function Library:CreateToggleButton(Text, Config)
+    if type(Text) == 'table' then Config = Text; Text = nil; end;
     Text = Text or 'Menu';
+    Config = Config or {};
+    local Icon = Config.Icon or '📁';
+    local isImage = type(Icon) == 'string' and (
+        Icon:match('^rbxassetid://')
+        or Icon:match('^https?://')
+        or Icon:match('^rbxthumb://')
+        or Icon:lower():match('%.png$')
+        or Icon:lower():match('%.jpg$')
+        or Icon:lower():match('%.jpeg$')
+        or Icon:lower():match('%.gif$')
+        or Icon:lower():match('%.webp$')
+    );
 
     local TweenService = game:GetService('TweenService');
     local fastTween  = TweenInfo.new(0.1,  Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
@@ -4076,22 +4123,35 @@ Size             = UDim2.fromOffset(130, 28);
         BackgroundColor3 = 'AccentColor';
     });
 
-    local IconLabel = Library:Create('TextLabel', {
-        BackgroundTransparency = 1;
-        Position  = UDim2.new(0, 6, 0, 0);
-        Size      = UDim2.new(0, 16, 1, 0);
-        Font      = Enum.Font.GothamBold;
-        Text      = '📁';
-        TextColor3 = Library.AccentColor;
-        TextSize  = 12;
-        TextXAlignment = Enum.TextXAlignment.Center;
-        ZIndex    = 304;
-        Parent    = ButtonInner;
-    });
-
-    Library:AddToRegistry(IconLabel, {
-        TextColor3 = 'AccentColor';
-    });
+    local IconLabel
+    if isImage then
+        IconLabel = Library:Create('ImageLabel', {
+            BackgroundTransparency = 1;
+            Position  = UDim2.new(0, 6, 0, 4);
+            Size      = UDim2.new(0, 16, 1, -8);
+            Image     = Icon;
+            ImageColor3 = Library.AccentColor;
+            ImageTransparency = 0.2;
+            ScaleType = Enum.ScaleType.Fit;
+            ZIndex    = 304;
+            Parent    = ButtonInner;
+        });
+        Library:AddToRegistry(IconLabel, { ImageColor3 = 'AccentColor' });
+    else
+        IconLabel = Library:Create('TextLabel', {
+            BackgroundTransparency = 1;
+            Position  = UDim2.new(0, 6, 0, 0);
+            Size      = UDim2.new(0, 16, 1, 0);
+            Font      = Enum.Font.GothamBold;
+            Text      = Icon;
+            TextColor3 = Library.AccentColor;
+            TextSize  = 12;
+            TextXAlignment = Enum.TextXAlignment.Center;
+            ZIndex    = 304;
+            Parent    = ButtonInner;
+        });
+        Library:AddToRegistry(IconLabel, { TextColor3 = 'AccentColor' });
+    end
 
     local Divider = Library:Create('Frame', {
         BackgroundColor3    = Library.OutlineColor or Color3.fromRGB(60, 60, 60);
