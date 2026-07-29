@@ -489,6 +489,8 @@ local Card4 = CardsRight:AddCard({
 
 Library:SetWatermarkVisibility(true)
 
+Library:CreateToggleButton('TCOLib')
+
 local FrameTimer = tick()
 local FrameCounter = 0
 local FPS = 60
