@@ -504,6 +504,36 @@ p1Light.Position   = UDim2.fromOffset(10, 146)
 p1Spec.Position    = UDim2.fromOffset(10, 178)
 p1Logo.Position    = UDim2.fromOffset(10, 210)
 
+local function setBtnText(btn, text)
+    for _, child in next, btn:GetDescendants() do
+        if child:IsA('TextLabel') and child.Text ~= '🌐' and child.Text ~= '✖' and child.Text ~= '🏗' and child.Text ~= '💡' and child.Text ~= '✨' and not child.Text:match('^rbx') then
+            child.Text = text
+            return
+        end
+    end
+end
+
+p1Servers.MouseButton1Click:Connect(function()
+    Toggles.SpeedEnabled:SetValue(not Toggles.SpeedEnabled.Value)
+    setBtnText(p1Servers, Toggles.SpeedEnabled.Value and 'Servers: ON' or 'Servers')
+end)
+p1Builds.MouseButton1Click:Connect(function()
+    Toggles.JumpEnabled:SetValue(not Toggles.JumpEnabled.Value)
+    setBtnText(p1Builds, Toggles.JumpEnabled.Value and 'Builds: ON' or 'Builds')
+end)
+p1Light.MouseButton1Click:Connect(function()
+    Toggles.Fullbright:SetValue(not Toggles.Fullbright.Value)
+    setBtnText(p1Light, Toggles.Fullbright.Value and 'Enlighten: ON' or 'Enlighten')
+end)
+p1Spec.MouseButton1Click:Connect(function()
+    Toggles.Noclip:SetValue(not Toggles.Noclip.Value)
+    setBtnText(p1Spec, Toggles.Noclip.Value and 'Special: ON' or 'Special')
+end)
+p1Logo.MouseButton1Click:Connect(function()
+    Toggles.RemoveFog:SetValue(not Toggles.RemoveFog.Value)
+    setBtnText(p1Logo, Toggles.RemoveFog.Value and 'Logo: ON' or 'Logo')
+end)
+
 local FrameTimer = tick()
 local FrameCounter = 0
 local FPS = 60

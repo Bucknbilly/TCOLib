@@ -4001,9 +4001,8 @@ Library:AddToRegistry(BtnLabel, { TextColor3 = 'FontColor' });
 					pcall(function() _BtnClickSfx:Play() end);
 					if OnClick then
 						pcall(OnClick);
-					else
-						Popout:Toggle();
 					end;
+					Popout:Toggle();
 				end;
 				_bDrag = false;
 			end);
