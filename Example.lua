@@ -12,6 +12,39 @@ local Window = Library:CreateWindow({
     MenuFadeTime = 0.2,
 })
 
+local Home = Library:CreateHomeTab(Window, {
+    Title = 'TCOLib',
+    Subtitle = 'A library for The Chosen One.',
+})
+
+local HomeInfo = Home:AddLeftGroupbox('Info')
+HomeInfo:AddLabel('TCOLib', true)
+HomeInfo:AddLabel('A UI library for The Chosen One.\nForked from peal-lib.', true)
+HomeInfo:AddDivider()
+HomeInfo:AddLabel('Place ID: ' .. tostring(game.PlaceId))
+HomeInfo:AddLabel('Job ID: ' .. tostring(game.JobId))
+HomeInfo:AddLabel('Players: ' .. tostring(#Players:GetPlayers()))
+
+local HomeBtns = Home:AddRightGroupbox('Quick Actions')
+HomeBtns:AddButton({ Text = 'Copy Discord Invite', Func = function()
+    if setclipboard then setclipboard('https://discord.gg/example') end
+    Library:Notify('Discord invite copied', 3)
+end })
+HomeBtns:AddButton({ Text = 'Copy Script Loader', Func = function()
+    if setclipboard then setclipboard('local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Bucknbilly/TCOLib/main/Library.lua"))()') end
+    Library:Notify('Loader copied', 3)
+end })
+HomeBtns:AddButton({ Text = 'Rejoin Server', Func = function()
+    game:GetService('TeleportService'):TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+end, DoubleClick = true })
+HomeBtns:AddDivider()
+HomeBtns:AddButton({ Text = 'Copy Place ID', Func = function()
+    if setclipboard then setclipboard(tostring(game.PlaceId)) end
+end })
+HomeBtns:AddButton({ Text = 'Copy Job ID', Func = function()
+    if setclipboard then setclipboard(game.JobId) end
+end })
+
 local Players = game:GetService('Players')
 local RunService = game:GetService('RunService')
 local UserInputService = game:GetService('UserInputService')
