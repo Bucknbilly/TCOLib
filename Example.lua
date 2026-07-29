@@ -502,7 +502,7 @@ local WatermarkConnection = RunService.RenderStepped:Connect(function()
         FrameTimer = tick()
         FrameCounter = 0
     end
-    Library:SetWatermark(('TCOLib | %s fps | %s ms'):format(
+    Library:SetWatermark(('TCOLib Example | %s fps | %s ms'):format(
         math.floor(FPS),
         math.floor(game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue())
     ))
