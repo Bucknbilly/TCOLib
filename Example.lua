@@ -70,16 +70,6 @@ PlayerLeft:AddToggle('SpeedEnabled', {
     Text = 'Enable Speed',
     Default = false,
     Tooltip = 'Multiplies WalkSpeed by the slider value.',
-    Callback = function(v)
-        if v then
-            RunService.Heartbeat:Connect(function()
-                if Toggles.SpeedEnabled.Value and LocalPlayer.Character then
-                    local hum = LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
-                    if hum then hum.WalkSpeed = defaultWalk * Options.SpeedMultiplier.Value end
-                end
-            end)
-        end
-    end,
 })
 PlayerLeft:AddSlider('SpeedMultiplier', {
     Text = 'Speed Multiplier',
@@ -94,16 +84,6 @@ PlayerLeft:AddToggle('JumpEnabled', {
     Text = 'Enable Jump Power',
     Default = false,
     Tooltip = 'Sets JumpPower to the slider value each frame.',
-    Callback = function(v)
-        if v then
-            RunService.Heartbeat:Connect(function()
-                if Toggles.JumpEnabled.Value and LocalPlayer.Character then
-                    local hum = LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
-                    if hum then hum.JumpPower = defaultJump * Options.JumpMultiplier.Value end
-                end
-            end)
-        end
-    end,
 })
 PlayerLeft:AddSlider('JumpMultiplier', {
     Text = 'Jump Multiplier',
@@ -133,6 +113,34 @@ Toggles.JumpEnabled:OnChanged(function()
     if not Toggles.JumpEnabled.Value then
         local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
         if hum then hum.JumpPower = defaultJump end
+    end
+end)
+
+local speedConn, jumpConn
+Toggles.SpeedEnabled:OnChanged(function()
+    if speedConn then speedConn:Disconnect(); speedConn = nil end
+    if Toggles.SpeedEnabled.Value then
+        speedConn = RunService.Heartbeat:Connect(function()
+            pcall(function()
+                if Toggles.SpeedEnabled.Value and LocalPlayer.Character and Options and Options.SpeedMultiplier then
+                    local hum = LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
+                    if hum then hum.WalkSpeed = defaultWalk * Options.SpeedMultiplier.Value end
+                end
+            end)
+        end)
+    end
+end)
+Toggles.JumpEnabled:OnChanged(function()
+    if jumpConn then jumpConn:Disconnect(); jumpConn = nil end
+    if Toggles.JumpEnabled.Value then
+        jumpConn = RunService.Heartbeat:Connect(function()
+            pcall(function()
+                if Toggles.JumpEnabled.Value and LocalPlayer.Character and Options and Options.JumpMultiplier then
+                    local hum = LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
+                    if hum then hum.JumpPower = defaultJump * Options.JumpMultiplier.Value end
+                end
+            end)
+        end)
     end
 end)
 
@@ -175,34 +183,42 @@ PlayerRight:AddToggle('Noclip', {
     Text = 'Noclip',
     Default = false,
     Tooltip = 'Walk through solid parts.',
-    Callback = function(v)
-        if v then
-            RunService.Stepped:Connect(function()
-                if Toggles.Noclip.Value and LocalPlayer.Character then
-                    for _, p in next, LocalPlayer.Character:GetDescendants() do
-                        if p:IsA('BasePart') then p.CanCollide = false end
-                    end
-                end
-            end)
-        end
-    end,
 })
 
 PlayerRight:AddToggle('InfiniteJump', {
     Text = 'Infinite Jump',
     Default = false,
     Tooltip = 'Lets you jump in mid-air.',
-    Callback = function(v)
-        if v then
-            UserInputService.JumpRequest:Connect(function()
+})
+
+local noclipConn, jumpReqConn
+Toggles.Noclip:OnChanged(function()
+    if noclipConn then noclipConn:Disconnect(); noclipConn = nil end
+    if Toggles.Noclip.Value then
+        noclipConn = RunService.Stepped:Connect(function()
+            pcall(function()
+                if Toggles.Noclip.Value and LocalPlayer.Character then
+                    for _, p in next, LocalPlayer.Character:GetDescendants() do
+                        if p:IsA('BasePart') then p.CanCollide = false end
+                    end
+                end
+            end)
+        end)
+    end
+end)
+Toggles.InfiniteJump:OnChanged(function()
+    if jumpReqConn then jumpReqConn:Disconnect(); jumpReqConn = nil end
+    if Toggles.InfiniteJump.Value then
+        jumpReqConn = UserInputService.JumpRequest:Connect(function()
+            pcall(function()
                 if Toggles.InfiniteJump.Value and LocalPlayer.Character then
                     local hum = LocalPlayer.Character:FindFirstChildOfClass('Humanoid')
                     if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
                 end
             end)
-        end
-    end,
-})
+        end)
+    end
+end)
 
 PlayerRight:AddSlider('FOV', {
     Text = 'Camera FOV',
@@ -502,6 +518,10 @@ Library.KeybindFrame.Visible = true
 
 Library:OnUnload(function()
     WatermarkConnection:Disconnect()
+    if speedConn   then speedConn:Disconnect()   end
+    if jumpConn    then jumpConn:Disconnect()    end
+    if noclipConn  then noclipConn:Disconnect()  end
+    if jumpReqConn then jumpReqConn:Disconnect() end
     Library.Unloaded = true
 end)
 
