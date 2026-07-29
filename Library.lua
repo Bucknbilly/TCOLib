@@ -50,12 +50,10 @@ local Library = {
 	FontColor = Color3.fromRGB(255, 255, 255);
 	MainColor = Color3.fromRGB(28, 28, 28);
 	BackgroundColor = Color3.fromRGB(20, 20, 20);
-	-- TCO yellow theme: warm #FFCC00 accent on dark grey (matches TCO profile picture)
 	AccentColor = Color3.fromRGB(255, 204, 0);
 	OutlineColor = Color3.fromRGB(50, 50, 50);
 	RiskColor = Color3.fromRGB(255, 50, 50),
 
-	-- TCOLib branding
 	Name = 'TCOLib',
 	Description = 'A library for The Chosen One.',
 	Prefix = 'tco',
@@ -3825,16 +3823,11 @@ end;
 		local Icon = Config.Icon or '🌐';
 		local OnClick = Config.OnClick or Config.Callback or Config.Func;
 		local isImage = type(Icon) == 'string' and (
-			Icon:match('^rbxassetid://')
-			or Icon:match('^https?://')
-			or Icon:match('^rbxthumb://')
-			or Icon:lower():match('%.png$')
-			or Icon:lower():match('%.jpg$')
-			or Icon:lower():match('%.jpeg$')
-			or Icon:lower():match('%.gif$')
-			or Icon:lower():match('%.webp$')
+			Icon:match('^rbxassetid://') or Icon:match('^https?://') or Icon:match('^rbxthumb://')
+			or Icon:lower():match('%.png$') or Icon:lower():match('%.jpg$')
+			or Icon:lower():match('%.jpeg$') or Icon:lower():match('%.gif$') or Icon:lower():match('%.webp$')
 		);
-
+		
 		local BtnOuter = Library:Create('Frame', {
 			Active           = true;
 			BackgroundColor3 = Library.OutlineColor;
@@ -3999,9 +3992,7 @@ Library:AddToRegistry(BtnLabel, { TextColor3 = 'FontColor' });
 				TweenService:Create(BtnInner, _ftw, { BackgroundColor3 = Library.MainColor }):Play();
 				if not _bDrag then
 					pcall(function() _BtnClickSfx:Play() end);
-					if OnClick then
-						pcall(OnClick);
-					end;
+					if OnClick then pcall(OnClick); end;
 					Popout:Toggle();
 				end;
 				_bDrag = false;
@@ -4014,21 +4005,8 @@ Library:AddToRegistry(BtnLabel, { TextColor3 = 'FontColor' });
 	return Popout;
 end;
 
-function Library:CreateToggleButton(Text, Config)
-    if type(Text) == 'table' then Config = Text; Text = nil; end;
+function Library:CreateToggleButton(Text)
     Text = Text or 'Menu';
-    Config = Config or {};
-    local Icon = Config.Icon or '📁';
-    local isImage = type(Icon) == 'string' and (
-        Icon:match('^rbxassetid://')
-        or Icon:match('^https?://')
-        or Icon:match('^rbxthumb://')
-        or Icon:lower():match('%.png$')
-        or Icon:lower():match('%.jpg$')
-        or Icon:lower():match('%.jpeg$')
-        or Icon:lower():match('%.gif$')
-        or Icon:lower():match('%.webp$')
-    );
 
     local TweenService = game:GetService('TweenService');
     local fastTween  = TweenInfo.new(0.1,  Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
@@ -4122,35 +4100,22 @@ Size             = UDim2.fromOffset(130, 28);
         BackgroundColor3 = 'AccentColor';
     });
 
-    local IconLabel
-    if isImage then
-        IconLabel = Library:Create('ImageLabel', {
-            BackgroundTransparency = 1;
-            Position  = UDim2.new(0, 6, 0, 4);
-            Size      = UDim2.new(0, 16, 1, -8);
-            Image     = Icon;
-            ImageColor3 = Library.AccentColor;
-            ImageTransparency = 0.2;
-            ScaleType = Enum.ScaleType.Fit;
-            ZIndex    = 304;
-            Parent    = ButtonInner;
-        });
-        Library:AddToRegistry(IconLabel, { ImageColor3 = 'AccentColor' });
-    else
-        IconLabel = Library:Create('TextLabel', {
-            BackgroundTransparency = 1;
-            Position  = UDim2.new(0, 6, 0, 0);
-            Size      = UDim2.new(0, 16, 1, 0);
-            Font      = Enum.Font.GothamBold;
-            Text      = Icon;
-            TextColor3 = Library.AccentColor;
-            TextSize  = 12;
-            TextXAlignment = Enum.TextXAlignment.Center;
-            ZIndex    = 304;
-            Parent    = ButtonInner;
-        });
-        Library:AddToRegistry(IconLabel, { TextColor3 = 'AccentColor' });
-    end
+    local IconLabel = Library:Create('TextLabel', {
+        BackgroundTransparency = 1;
+        Position  = UDim2.new(0, 6, 0, 0);
+        Size      = UDim2.new(0, 16, 1, 0);
+        Font      = Enum.Font.GothamBold;
+        Text      = '📁';
+        TextColor3 = Library.AccentColor;
+        TextSize  = 12;
+        TextXAlignment = Enum.TextXAlignment.Center;
+        ZIndex    = 304;
+        Parent    = ButtonInner;
+    });
+
+    Library:AddToRegistry(IconLabel, {
+        TextColor3 = 'AccentColor';
+    });
 
     local Divider = Library:Create('Frame', {
         BackgroundColor3    = Library.OutlineColor or Color3.fromRGB(60, 60, 60);
@@ -4173,9 +4138,8 @@ Size             = UDim2.fromOffset(130, 28);
         Font      = Library.Font or Enum.Font.Gotham;
         Text = 'Close UI';
         TextColor3 = Library.FontColor or Color3.fromRGB(240, 240, 240);
-        TextSize  = 11;
+        TextSize  = 12;
         TextXAlignment = Enum.TextXAlignment.Left;
-        TextTruncate = Enum.TextTruncate.AtEnd;
         ZIndex    = 304;
         Parent    = ButtonInner;
     });
